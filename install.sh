@@ -16,13 +16,6 @@
 
 
 #!/usr/bin/env bash
-
-# ==========================================
-# QMENU - Installation Script
-# Installs dependencies, embedded Gum,
-# project files and global 'qmenu' command.
-# ==========================================
-
 set -e
 
 echo "=========================================="
@@ -72,13 +65,14 @@ install_deps() {
 
 
 # ------------------------------------------
-# Create user directories
+# Create user directories (standard Linux path)
 # ------------------------------------------
 setup_dirs() {
     echo "[2/5] Creating QMENU directories..."
 
-    mkdir -p "$HOME/vmsqmenu"
-    mkdir -p "$HOME/isosqmenu"
+    mkdir -p "$HOME/.local/share/qmenu/vms"
+    mkdir -p "$HOME/.local/share/qmenu/isos"
+    mkdir -p "$HOME/.local/share/qmenu/logs"
     mkdir -p "$HOME/.config/qmenu"
 
     echo "Directories ready ✔"
@@ -94,10 +88,10 @@ install_qmenu() {
     sudo rm -rf /opt/qmenu 2>/dev/null || true
     sudo mkdir -p /opt/qmenu
 
-    # Copy entire project including helpers/
+    # Copy entire repo
     sudo rsync -av . /opt/qmenu/ >/dev/null
 
-    # Copy default config to user directory
+    # Copy default config to user
     cp config/defaults.conf "$HOME/.config/qmenu/defaults.conf"
 
     echo "QMENU copied to /opt/qmenu ✔"
@@ -105,7 +99,7 @@ install_qmenu() {
 
 
 # ------------------------------------------
-# Install Gum (offline from embedded gum.b64)
+# Install Gum (from embedded gum.b64)
 # ------------------------------------------
 install_gum() {
     echo "[4/5] Installing Gum (offline/local)..."
@@ -115,7 +109,6 @@ install_gum() {
         return
     fi
 
-    # Must exist inside /opt/qmenu/helpers/
     if [[ ! -f "/opt/qmenu/helpers/gum.b64" ]]; then
         echo "ERROR: /opt/qmenu/helpers/gum.b64 not found!"
         exit 1
@@ -130,7 +123,7 @@ install_gum() {
 
 
 # ------------------------------------------
-# Register global command: qmenu
+# Register global command
 # ------------------------------------------
 register_command() {
     echo "[5/5] Creating global 'qmenu' command..."
@@ -142,7 +135,6 @@ register_command() {
 exec /opt/qmenu/main.sh "\$@"
 EOF'
 
-    # Critical fix for all users (avoids “permission denied”)
     sudo chmod 755 /usr/local/bin/qmenu
 
     echo "'qmenu' command registered ✔"
@@ -166,8 +158,9 @@ echo ""
 echo "Run it with:"
 echo "   qmenu"
 echo ""
-echo "VMs directory:   ~/vmsqmenu"
-echo "ISOs directory:  ~/isosqmenu"
+echo "VMs directory:   ~/.local/share/qmenu/vms"
+echo "ISOs directory:  ~/.local/share/qmenu/isos"
+echo "Logs directory:  ~/.local/share/qmenu/logs"
 echo "Config file:     ~/.config/qmenu/defaults.conf"
 echo ""
 echo "Enjoy! 🚀"
