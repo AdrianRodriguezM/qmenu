@@ -22,27 +22,15 @@
 # QMENU - Snapshot Manager (TUI Modern Edition)
 # ==========================================
 
+
 snapshot_manager() {
 
-    # -----------------------------
-    # SELECT VM
-    # -----------------------------
-    gum style --border double --padding "1 2" \
-        --border-foreground 212 \
+    gum style --border double --padding "1 2" --border-foreground 212 \
         "SNAPSHOT MANAGER"
 
     VM=$(list_qcow2 | gum filter --placeholder "Select VM...")
     [[ -z "$VM" ]] && { gum style --foreground 196 "No VM selected."; return; }
 
-    gum style --foreground 33 "Selected VM:"
-    gum style --border normal --padding "1 2" "$VM"
-
-    # Load snapshot list
-    SNAP_LIST=$(detect_snapshots "$VM")
-
-    # -----------------------------
-    # MAIN SNAPSHOT ACTION MENU
-    # -----------------------------
     ACTION=$(gum choose \
         "List snapshots" \
         "Create snapshot" \
@@ -60,29 +48,22 @@ snapshot_manager() {
 }
 
 
-# -------------------------------------
-# LIST SNAPSHOTS
-# -------------------------------------
+# LIST
 snapshot_list_tui() {
     VM="$1"
-
-    gum style --border double --padding "1 2" \
-        --border-foreground 212 \
-        "Snapshots for: $VM"
+    gum style --border double --padding "1 2" --border-foreground 212 \
+        "Snapshots in: $VM"
 
     detect_snapshots "$VM" | gum style --padding "1 2"
-
-    gum confirm "Back?" && return
+    pause
 }
 
 
-# -------------------------------------
-# CREATE SNAPSHOT
-# -------------------------------------
+# CREATE
 snapshot_create_tui() {
     VM="$1"
 
-    NAME=$(gum input --placeholder "Snapshot name (leave empty for auto)")
+    NAME=$(gum input --placeholder "Snapshot name")
     [[ -z "$NAME" ]] && NAME="${SNAPSHOT_PREFIX}$(date +%s)"
 
     gum spin --spinner pulse --title "Creating snapshot..." -- \
@@ -93,40 +74,35 @@ snapshot_create_tui() {
 }
 
 
-# -------------------------------------
-# APPLY SNAPSHOT
-# -------------------------------------
+# APPLY
 snapshot_apply_tui() {
     VM="$1"
 
-    SNAP=$(detect_snapshots "$VM" | gum filter --placeholder "Select snapshot to apply...")
+    SNAP=$(detect_snapshots "$VM" | gum filter --placeholder "Select snapshot")
     [[ -z "$SNAP" ]] && { gum style --foreground 196 "No snapshot selected."; return; }
 
-    gum confirm "Apply snapshot: $SNAP ?" || return
+    gum confirm "Apply '$SNAP' ?" || return
 
     gum spin --spinner globe --title "Applying snapshot..." -- \
         qemu-img snapshot -a "$SNAP" "$VM"
 
-    gum style --foreground 46 "Snapshot applied: $SNAP"
+    gum style --foreground 46 "Snapshot applied."
     pause
 }
 
 
-# -------------------------------------
-# DELETE SNAPSHOT
-# -------------------------------------
+# DELETE
 snapshot_delete_tui() {
     VM="$1"
 
-    SNAP=$(detect_snapshots "$VM" | gum filter --placeholder "Select snapshot to delete...")
+    SNAP=$(detect_snapshots "$VM" | gum filter --placeholder "Select snapshot")
     [[ -z "$SNAP" ]] && { gum style --foreground 196 "No snapshot selected."; return; }
 
-    gum confirm "Delete snapshot: $SNAP ?" || return
+    gum confirm "Delete '$SNAP' ?" || return
 
-    gum spin --spinner monkey --title "Deleting snapshot..." -- \
+    gum spin --spinner line --title "Deleting snapshot..." -- \
         qemu-img snapshot -d "$SNAP" "$VM"
 
-    gum style --foreground 196 "Snapshot deleted: $SNAP"
+    gum style --foreground 196 "Snapshot deleted."
     pause
 }
-
