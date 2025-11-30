@@ -58,13 +58,30 @@ qmenu
 
 ## 📁 Default directories
 
-QMENU automatically manages:
+QMENU uses the **Linux XDG-standard paths** to store your VM data:
 
 ```
-~/vmsqmenu      → VM disks and configurations
-~/isosqmenu     → ISO files for installation
-~/.config/qmenu → User configuration
+~/.local/share/qmenu/vms   → VM disks (.qcow2)
+~/.local/share/qmenu/isos  → ISO files for installation
+~/.local/share/qmenu/logs  → Log files
+~/.config/qmenu            → User configuration (defaults.conf)
 ```
+
+### 📥 Adding your own ISOs or VMs
+
+To make QMENU auto-detect your files:
+
+- Put **ISO files** in:
+  ```
+  ~/.local/share/qmenu/isos
+  ```
+
+- Put **existing qcow2 VMs** in:
+  ```
+  ~/.local/share/qmenu/vms
+  ```
+
+They will automatically appear in the **VM Library**, **Start VM**, and **Snapshot** menus.
 
 ---
 
